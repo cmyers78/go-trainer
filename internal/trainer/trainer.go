@@ -153,6 +153,9 @@ func (t *CLTTrainer) runSingleChallenge(challenge models.Challenge, challengeNum
 		
 		switch strings.ToLower(input) {
 		case "quit":
+			// Update progress before quitting
+			t.progress[t.current].Attempts += attempts
+			t.progress[t.current].HintsUsed += hintsUsed
 			return false
 		case "help":
 			t.showHelp()
@@ -161,15 +164,20 @@ func (t *CLTTrainer) runSingleChallenge(challenge models.Challenge, challengeNum
 			if hintsUsed < len(challenge.Hints) {
 				fmt.Printf("💡 Hint: %s\n", challenge.Hints[hintsUsed])
 				hintsUsed++
+				t.progress[t.current].HintsUsed++
 			} else {
 				fmt.Printf("💡 Solution: %s\n", challenge.Solution)
 			}
 			continue
 		case "skip":
 			fmt.Printf("⏭️  Skipped. Solution: %s\n", challenge.Solution)
+			// Update progress for skipped challenge
+			t.progress[t.current].Attempts += attempts
+			t.progress[t.current].HintsUsed += hintsUsed
 			return true
 		default:
 			attempts++
+			t.progress[t.current].Attempts++
 			if challenge.Validator(input) {
 				fmt.Println("✅ Excellent! That's correct!")
 				
@@ -251,6 +259,20 @@ func (t *CLTTrainer) showFinalResults() {
 	
 	fmt.Printf("Exercises completed: %d/%d\n", completed, len(t.exercises))
 	fmt.Printf("Total time: %.1f minutes\n", totalTime.Minutes())
+	
+	// Learning analytics summary
+	totalAttempts := 0
+	totalHints := 0
+	for _, progress := range t.progress[:completed] {
+		totalAttempts += progress.Attempts
+		totalHints += progress.HintsUsed
+	}
+	
+	fmt.Printf("Total attempts: %d\n", totalAttempts)
+	fmt.Printf("Hints used: %d\n", totalHints)
+	if completed > 0 {
+		fmt.Printf("Average attempts per exercise: %.1f\n", float64(totalAttempts)/float64(completed))
+	}
 	
 	// Learning reinforcement
 	fmt.Println("\n🧠 Key Concepts Learned:")

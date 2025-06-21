@@ -86,3 +86,21 @@ func TestExerciseTypes(t *testing.T) {
 		t.Error("Functions should be an application exercise")
 	}
 }
+
+func TestProgressTracking(t *testing.T) {
+	// Test that LearningProgress struct has all required fields
+	progress := models.LearningProgress{
+		ExerciseID: "test",
+		StartTime:  time.Now(),
+		Attempts:   5,
+		HintsUsed:  2,
+	}
+	
+	if progress.Attempts != 5 {
+		t.Error("Attempts field should be properly set")
+	}
+	
+	if progress.HintsUsed != 2 {
+		t.Error("HintsUsed field should be properly set")
+	}
+}
