@@ -74,9 +74,7 @@ go test -run TestVariablesValidator
 ├── internal/              # Private application code
 │   ├── models/           # Core data structures (Exercise, Trainer, Config)
 │   ├── exercises/        # Exercise definitions and registry
-│   ├── trainer/          # CLT-based training logic
-│   └── ui/               # User interface components
-├── pkg/clt/              # Cognitive Load Theory utilities
+│   └── trainer/          # CLT-based training logic
 └── tests/                # Test organization
     ├── unit/             # Unit tests
     ├── integration/      # Integration tests
@@ -86,6 +84,6 @@ go test -run TestVariablesValidator
 ### Key Components
 
 - **Models** - Domain entities with CLT-specific fields (cognitive level, exercise type)
-- **Exercises** - Learning modules with worked examples and progressive challenges
-- **Trainer** - CLT implementation with adaptive pacing and feedback
-- **CLT Package** - Reusable cognitive load theory utilities
+- **Exercises** - Learning modules with worked examples and progressive challenges  
+- **Trainer** - CLT implementation with adaptive pacing, feedback, and scoring
+- **Tests** - Comprehensive validation including CLT principle adherence

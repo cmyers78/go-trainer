@@ -13,13 +13,6 @@ type LearningProgress struct {
 	HintsUsed     int
 }
 
-// Trainer manages the learning session
-type Trainer struct {
-	Exercises    []Exercise
-	Progress     []LearningProgress
-	CurrentIndex int
-	StartTime    time.Time
-}
 
 // TrainerConfig holds configuration for the training session
 type TrainerConfig struct {

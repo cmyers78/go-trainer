@@ -110,7 +110,7 @@ func (t *CLTTrainer) showExamples(exercise models.Exercise) {
 		fmt.Printf("\n%d. %s\n", i+1, example.Title)
 		fmt.Println(strings.Repeat("-", len(example.Title)+3))
 		
-		fmt.Printf("Code:\n```go\n%s\n```\n\n", example.Code)
+		fmt.Printf("Code:\n%s\n\n", t.FormatCodeBlock(example.Code))
 		fmt.Printf("Explanation: %s\n", example.Explanation)
 		
 		if example.Output != "" {
@@ -130,7 +130,13 @@ func (t *CLTTrainer) runChallenges(exercise models.Exercise, reader *bufio.Reade
 		fmt.Printf("\nChallenge %d/%d\n", i+1, len(exercise.Challenges))
 		fmt.Println(strings.Repeat("-", 15))
 		
-		if !t.runSingleChallenge(challenge, i, reader) {
+		completed, attempts, hintsUsed := t.runSingleChallenge(challenge, i, reader)
+		
+		// Aggregate progress for the exercise
+		t.progress[t.current].Attempts += attempts
+		t.progress[t.current].HintsUsed += hintsUsed
+		
+		if !completed {
 			return false // User quit
 		}
 	}
@@ -139,9 +145,9 @@ func (t *CLTTrainer) runChallenges(exercise models.Exercise, reader *bufio.Reade
 }
 
 // runSingleChallenge handles individual challenge with adaptive support
-func (t *CLTTrainer) runSingleChallenge(challenge models.Challenge, challengeNum int, reader *bufio.Reader) bool {
+func (t *CLTTrainer) runSingleChallenge(challenge models.Challenge, challengeNum int, reader *bufio.Reader) (bool, int, int) {
 	fmt.Printf("Task: %s\n\n", challenge.Description)
-	fmt.Printf("Template:\n```go\n%s\n```\n\n", challenge.Template)
+	fmt.Printf("Template:\n%s\n\n", t.FormatCodeBlock(challenge.Template))
 	
 	attempts := 0
 	hintsUsed := 0
@@ -153,10 +159,7 @@ func (t *CLTTrainer) runSingleChallenge(challenge models.Challenge, challengeNum
 		
 		switch strings.ToLower(input) {
 		case "quit":
-			// Update progress before quitting
-			t.progress[t.current].Attempts += attempts
-			t.progress[t.current].HintsUsed += hintsUsed
-			return false
+			return false, attempts, hintsUsed
 		case "help":
 			t.showHelp()
 			continue
@@ -164,20 +167,15 @@ func (t *CLTTrainer) runSingleChallenge(challenge models.Challenge, challengeNum
 			if hintsUsed < len(challenge.Hints) {
 				fmt.Printf("💡 Hint: %s\n", challenge.Hints[hintsUsed])
 				hintsUsed++
-				t.progress[t.current].HintsUsed++
 			} else {
 				fmt.Printf("💡 Solution: %s\n", challenge.Solution)
 			}
 			continue
 		case "skip":
 			fmt.Printf("⏭️  Skipped. Solution: %s\n", challenge.Solution)
-			// Update progress for skipped challenge
-			t.progress[t.current].Attempts += attempts
-			t.progress[t.current].HintsUsed += hintsUsed
-			return true
+			return true, attempts, hintsUsed
 		default:
 			attempts++
-			t.progress[t.current].Attempts++
 			if challenge.Validator(input) {
 				fmt.Println("✅ Excellent! That's correct!")
 				
@@ -189,7 +187,7 @@ func (t *CLTTrainer) runSingleChallenge(challenge models.Challenge, challengeNum
 				} else {
 					fmt.Println("💪 Great persistence!")
 				}
-				return true
+				return true, attempts, hintsUsed
 			} else {
 				t.provideAdaptiveFeedback(attempts, challengeNum, challenge)
 			}
@@ -197,7 +195,7 @@ func (t *CLTTrainer) runSingleChallenge(challenge models.Challenge, challengeNum
 	}
 	
 	fmt.Printf("Max attempts reached. Solution: %s\n", challenge.Solution)
-	return true
+	return true, attempts, hintsUsed
 }
 
 // provideAdaptiveFeedback gives targeted help based on CLT principles
@@ -220,6 +218,8 @@ func (t *CLTTrainer) startExercise(exercise models.Exercise) {
 		ExerciseID: exercise.ID,
 		StartTime:  time.Now(),
 		Attempts:   0,
+		Score:      0.0,
+		HintsUsed:  0,
 	}
 }
 
@@ -229,8 +229,58 @@ func (t *CLTTrainer) completeExercise(exercise models.Exercise) {
 	t.progress[t.current].CompletedAt = &now
 	t.progress[t.current].TimeSpent = now.Sub(t.progress[t.current].StartTime)
 	
+	// Calculate score based on CLT principles
+	t.progress[t.current].Score = t.calculateScore(exercise)
+	
 	fmt.Printf("✅ %s completed!\n", exercise.Title)
-	fmt.Printf("Time spent: %.1f minutes\n\n", t.progress[t.current].TimeSpent.Minutes())
+	fmt.Printf("Time spent: %.1f minutes\n", t.progress[t.current].TimeSpent.Minutes())
+	fmt.Printf("Score: %.1f/100\n\n", t.progress[t.current].Score)
+}
+
+// calculateScore implements CLT-based scoring algorithm
+func (t *CLTTrainer) calculateScore(exercise models.Exercise) float64 {
+	progress := t.progress[t.current]
+	numChallenges := len(exercise.Challenges)
+	
+	// Base score for completion
+	baseScore := 60.0
+	
+	// Bonus for efficiency (fewer attempts relative to max possible)
+	maxPossibleAttempts := numChallenges * t.config.MaxAttempts
+	if maxPossibleAttempts > 0 {
+		efficiencyRatio := 1.0 - (float64(progress.Attempts) / float64(maxPossibleAttempts))
+		efficiencyBonus := efficiencyRatio * 30.0 // Up to 30 points for efficiency
+		baseScore += efficiencyBonus
+	}
+	
+	// Penalty for excessive hint usage
+	if progress.HintsUsed > 0 {
+		// Lose 2 points per hint, but cap the penalty
+		hintPenalty := float64(progress.HintsUsed) * 2.0
+		if hintPenalty > 10.0 {
+			hintPenalty = 10.0 // Max 10 point penalty
+		}
+		baseScore -= hintPenalty
+	}
+	
+	// Bonus for fast completion (relative to estimated time)
+	estimatedMinutes := float64(exercise.EstimatedTime)
+	actualMinutes := progress.TimeSpent.Minutes()
+	if actualMinutes < estimatedMinutes {
+		speedRatio := (estimatedMinutes - actualMinutes) / estimatedMinutes
+		speedBonus := speedRatio * 10.0 // Up to 10 points for speed
+		baseScore += speedBonus
+	}
+	
+	// Ensure score is between 0 and 100
+	if baseScore < 0 {
+		baseScore = 0
+	}
+	if baseScore > 100 {
+		baseScore = 100
+	}
+	
+	return baseScore
 }
 
 // showHelp provides contextual assistance
@@ -263,15 +313,26 @@ func (t *CLTTrainer) showFinalResults() {
 	// Learning analytics summary
 	totalAttempts := 0
 	totalHints := 0
+	totalScore := 0.0
 	for _, progress := range t.progress[:completed] {
 		totalAttempts += progress.Attempts
 		totalHints += progress.HintsUsed
+		totalScore += progress.Score
 	}
 	
 	fmt.Printf("Total attempts: %d\n", totalAttempts)
 	fmt.Printf("Hints used: %d\n", totalHints)
 	if completed > 0 {
 		fmt.Printf("Average attempts per exercise: %.1f\n", float64(totalAttempts)/float64(completed))
+		fmt.Printf("Average score: %.1f/100\n", totalScore/float64(completed))
+	}
+	
+	// Individual exercise scores
+	if completed > 0 {
+		fmt.Println("\n📊 Exercise Scores:")
+		for i, progress := range t.progress[:completed] {
+			fmt.Printf("  %s: %.1f/100\n", t.exercises[i].Title, progress.Score)
+		}
 	}
 	
 	// Learning reinforcement
@@ -287,4 +348,27 @@ func (t *CLTTrainer) showFinalResults() {
 	fmt.Println("  • Practice these concepts in your own projects")
 	fmt.Println("  • Explore Go's standard library")
 	fmt.Println("  • Join the Go community online")
+}
+
+// FormatCodeBlock formats code for clean terminal display
+func (t *CLTTrainer) FormatCodeBlock(code string) string {
+	lines := strings.Split(code, "\n")
+	var formatted strings.Builder
+	
+	// Add top border
+	formatted.WriteString("┌" + strings.Repeat("─", 60) + "┐\n")
+	
+	// Add code lines with side borders and indentation
+	for _, line := range lines {
+		// Ensure line fits within border, truncate if necessary
+		if len(line) > 56 {
+			line = line[:53] + "..."
+		}
+		formatted.WriteString(fmt.Sprintf("│  %-56s  │\n", line))
+	}
+	
+	// Add bottom border
+	formatted.WriteString("└" + strings.Repeat("─", 60) + "┘")
+	
+	return formatted.String()
 }

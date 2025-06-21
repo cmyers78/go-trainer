@@ -94,7 +94,7 @@ func TestChallengeValidators(t *testing.T) {
 	}
 }
 
-func TestCognitivePrinciples(t *testing.T) {
+func TestCLTPrinciplesInExerciseDesign(t *testing.T) {
 	exercise := exercises.GetVariablesExercise()
 	
 	// Test worked example effect - examples before challenges
@@ -116,5 +116,10 @@ func TestCognitivePrinciples(t *testing.T) {
 		if len(challenge.Hints) == 0 {
 			t.Error("Challenges should provide hints for guidance")
 		}
+	}
+	
+	// Test faded guidance - multiple challenges with decreasing support
+	if len(exercise.Challenges) < 2 {
+		t.Error("Should provide multiple challenges for faded guidance")
 	}
 }
