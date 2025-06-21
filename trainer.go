@@ -20,7 +20,7 @@ func NewTrainer() *Trainer {
 func (t *Trainer) Start() {
 	fmt.Println("🎯 Welcome to the Go Trainer!")
 	fmt.Println("This interactive trainer will help you learn Go step by step.")
-	fmt.Println("Type 'help' for commands, 'quit' to exit.\n")
+	fmt.Println("Type 'help' for commands, 'quit' to exit.")
 
 	reader := bufio.NewReader(os.Stdin)
 

@@ -30,9 +30,32 @@ go run .
 - `skip` - Skip current exercise
 - `quit` - Exit the trainer
 
+## Testing
+
+Run all tests:
+```bash
+go test
+```
+
+Run tests with coverage:
+```bash
+go test -cover
+```
+
+Run benchmarks:
+```bash
+go test -bench=.
+```
+
+Run specific test:
+```bash
+go test -run TestVariablesValidator
+```
+
 ## Architecture
 
 - `main.go` - Application entry point
 - `models.go` - Core data structures
 - `exercises.go` - Exercise definitions
 - `trainer.go` - Training logic and UI
+- `*_test.go` - Test files with unit tests and benchmarks

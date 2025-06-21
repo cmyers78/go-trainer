@@ -52,7 +52,8 @@ func GetExercises() []Exercise {
 			Template:    "package main\n\ntype Person struct {\n\tName string\n\tAge  int\n}\n\nfunc main() {\n\tp := Person{Name: \"Alice\", Age: 30}\n\tfmt.Println(p.Greet())\n}\n\n// Your method here",
 			Solution:    "func (p Person) Greet() string {\n\treturn \"Hello, I'm \" + p.Name\n}",
 			Validator: func(code string) bool {
-				return strings.Contains(code, "func (p Person) Greet()") && strings.Contains(code, "string") && strings.Contains(code, "return")
+				return strings.Contains(code, "Greet()") && strings.Contains(code, "string") && strings.Contains(code, "return") && 
+					   (strings.Contains(code, "func (p Person)") || strings.Contains(code, "func (p *Person)"))
 			},
 		},
 	}
