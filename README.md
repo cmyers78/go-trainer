@@ -1,33 +1,48 @@
-# Go Trainer
+# Go Trainer with Cognitive Load Theory
 
-An interactive command-line trainer for learning Go programming fundamentals.
+An interactive command-line trainer for learning Go programming fundamentals, built using proven learning science principles from Cognitive Load Theory (CLT).
 
 ## Features
 
-- 5 progressive exercises covering Go basics
-- Interactive examples before each exercise
-- Hint system and solution validation
-- Progress tracking and scoring
+- **Worked Examples First** - Study complete solutions before practicing
+- **Progressive Disclosure** - Complex concepts broken into manageable chunks  
+- **Multiple Practice Challenges** - Faded guidance from scaffolded to independent
+- **Adaptive Feedback** - Context-aware hints and support
+- **Learning Analytics** - Track time, attempts, and progress
+
+## Cognitive Load Theory Principles Applied
+
+### 🧠 Intrinsic Load Management
+- Prerequisites clearly defined
+- Single learning objective per exercise
+- Concepts introduced in logical progression
+
+### 🎯 Extraneous Load Reduction  
+- Clean, consistent interface
+- Clear learning goals stated upfront
+- Minimal cognitive distractions
+
+### 💡 Germane Load Optimization
+- Worked examples demonstrate patterns
+- Multiple contexts for same concept
+- Elaborative feedback reinforces learning
 
 ## Topics Covered
 
-1. **Variables and Types** - Learn Go's type system and variable declarations
-2. **Functions** - Create functions with parameters and return values
-3. **Slices** - Work with Go's dynamic arrays
-4. **Structs** - Define custom data types
-5. **Methods** - Add behavior to your structs
+1. **Variables and Types** - Master Go's variable declarations and type system
+2. **Functions** - Learn to create and use functions effectively
 
 ## Usage
 
 ```bash
-go run .
+go run cmd/trainer/main.go
 ```
 
 ## Commands
 
 - `help` - Show available commands
-- `hint` - Show solution for current exercise
-- `skip` - Skip current exercise
+- `hint` - Get step-by-step guidance
+- `skip` - Skip current challenge and see solution
 - `quit` - Exit the trainer
 
 ## Testing
@@ -54,8 +69,21 @@ go test -run TestVariablesValidator
 
 ## Architecture
 
-- `main.go` - Application entry point
-- `models.go` - Core data structures
-- `exercises.go` - Exercise definitions
-- `trainer.go` - Training logic and UI
-- `*_test.go` - Test files with unit tests and benchmarks
+```
+├── cmd/trainer/           # Application entry points
+├── internal/              # Private application code
+│   ├── models/           # Core data structures (Exercise, Trainer, Config)
+│   ├── exercises/        # Exercise definitions and registry
+│   └── trainer/          # CLT-based training logic
+└── tests/                # Test organization
+    ├── unit/             # Unit tests
+    ├── integration/      # Integration tests
+    └── benchmark/        # Performance benchmarks
+```
+
+### Key Components
+
+- **Models** - Domain entities with CLT-specific fields (cognitive level, exercise type)
+- **Exercises** - Learning modules with worked examples and progressive challenges  
+- **Trainer** - CLT implementation with adaptive pacing, feedback, and scoring
+- **Tests** - Comprehensive validation including CLT principle adherence
