@@ -1,0 +1,39 @@
+name: Nightly Tests
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # Run at 3:00 AM UTC daily
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.22'
+        
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+          
+    - name: Download dependencies
+      run: go mod download
+      
+    - name: Run unit tests
+      run: go test ./tests/unit/...
+      
+    - name: Run benchmark tests
+      run: go test -bench=. ./tests/benchmark/...
+      
+    - name: Run integration tests
+      run: go test ./tests/integration/...
