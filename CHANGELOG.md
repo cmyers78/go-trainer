@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Enhanced Learning Curriculum** - Comprehensive lesson plan with proper learning progression
+  - Basic Data Types exercise covering numeric types, strings, and constants  
+  - Composite Types exercise covering arrays, slices, and maps
+  - Structs exercise covering struct definition, methods, and embedding
+- **Updated Exercise Registry** - Proper learning progression with prerequisite dependencies
+- **Improved GitHub Actions** - Fixed nightly tests workflow for empty integration directory
+
+### Changed
+- **Exercise Ordering** - Reordered functions to come after composite types in curriculum for better learning flow
+- **Prerequisites** - Updated function exercise prerequisites to include basic and composite types
+
 ## [2.0.0] - 2025-01-XX
 
 ### 🧠 Major: Cognitive Load Theory Implementation

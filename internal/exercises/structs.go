@@ -108,9 +108,9 @@ func main() {
 				Code: `import "encoding/json"
 
 type User struct {
-    ID       int    \`json:"id"\`
-    Username string \`json:"username"\`
-    Email    string \`json:"email,omitempty"\`
+    ID       int    ` + "`json:\"id\"`" + `
+    Username string ` + "`json:\"username\"`" + `
+    Email    string ` + "`json:\"email,omitempty\"`" + `
     password string // lowercase = private, won't be exported
 }
 
