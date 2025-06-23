@@ -15,7 +15,10 @@ func NewRegistry() *Registry {
 	
 	// Register all exercises
 	registry.exercises["variables"] = GetVariablesExercise()
+	registry.exercises["basic-types"] = GetBasicTypesExercise()
+	registry.exercises["composite-types"] = GetCompositeTypesExercise()
 	registry.exercises["functions"] = GetFunctionsExercise()
+	registry.exercises["structs"] = GetStructsExercise()
 	
 	return registry
 }
@@ -23,7 +26,7 @@ func NewRegistry() *Registry {
 // GetAll returns all exercises in learning order
 func (r *Registry) GetAll() []models.Exercise {
 	// Return exercises in pedagogical order
-	order := []string{"variables", "functions"}
+	order := []string{"variables", "basic-types", "composite-types", "functions", "structs"}
 	
 	var exercises []models.Exercise
 	for _, id := range order {

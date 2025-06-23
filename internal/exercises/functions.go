@@ -14,7 +14,7 @@ func GetFunctionsExercise() models.Exercise {
 		Description:    "Learn to create and use functions effectively",
 		CognitiveLevel: models.Beginner,
 		ExerciseType:   models.Application,
-		Prerequisites:  []string{"variables"},
+		Prerequisites:  []string{"variables", "basic-types", "composite-types"},
 		LearningGoals: []string{
 			"Write functions with parameters and return values",
 			"Understand function signatures and naming conventions",
