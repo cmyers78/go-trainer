@@ -30,7 +30,10 @@ An interactive command-line trainer for learning Go programming fundamentals, bu
 ## Topics Covered
 
 1. **Variables and Types** - Master Go's variable declarations and type system
-2. **Functions** - Learn to create and use functions effectively
+2. **Basic Data Types** - Understand numeric types, strings, constants, and type conversions
+3. **Composite Types** - Work with arrays, slices, and maps effectively
+4. **Functions** - Learn to create and use functions with parameters and return values  
+5. **Structs and Methods** - Define custom types with methods and embedding
 
 ## Usage
 
