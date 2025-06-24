@@ -8,6 +8,7 @@ An interactive command-line trainer for learning Go programming fundamentals, bu
 - **Progressive Disclosure** - Complex concepts broken into manageable chunks  
 - **Multiple Practice Challenges** - Faded guidance from scaffolded to independent
 - **Adaptive Feedback** - Context-aware hints and support
+- **Session Management** - Pause and resume training sessions seamlessly
 - **Learning Analytics** - Track time, attempts, and progress
 
 ## Cognitive Load Theory Principles Applied
@@ -37,16 +38,46 @@ An interactive command-line trainer for learning Go programming fundamentals, bu
 
 ## Usage
 
+### Start New Training Session
 ```bash
 go run cmd/trainer/main.go
 ```
 
+### Resume Paused Session
+```bash
+go run cmd/trainer/main.go resume
+```
+
+### View All Sessions
+```bash
+go run cmd/trainer/main.go list
+```
+
+### Delete Old Sessions
+```bash
+go run cmd/trainer/main.go delete
+```
+
 ## Commands
+
+During training challenges, use these commands:
 
 - `help` - Show available commands
 - `hint` - Get step-by-step guidance
 - `skip` - Skip current challenge and see solution
-- `quit` - Exit the trainer
+- `pause` - Save progress and exit (resume later)
+- `quit` - Exit without saving progress
+
+## Session Management
+
+Training sessions are automatically saved to `~/.claude-trainer/sessions/` and include:
+
+- Current exercise position
+- Progress and scores for completed exercises
+- Time spent and attempts made
+- Hints used and configuration settings
+
+Sessions persist across application restarts, allowing you to pause training at any time and resume exactly where you left off.
 
 ## Testing
 
@@ -77,6 +108,7 @@ go test -run TestVariablesValidator
 ├── internal/              # Private application code
 │   ├── models/           # Core data structures (Exercise, Trainer, Config)
 │   ├── exercises/        # Exercise definitions and registry
+│   ├── storage/          # Session persistence and storage
 │   └── trainer/          # CLT-based training logic
 └── tests/                # Test organization
     ├── unit/             # Unit tests
@@ -86,7 +118,8 @@ go test -run TestVariablesValidator
 
 ### Key Components
 
-- **Models** - Domain entities with CLT-specific fields (cognitive level, exercise type)
+- **Models** - Domain entities with CLT-specific fields (cognitive level, exercise type, training sessions)
 - **Exercises** - Learning modules with worked examples and progressive challenges  
-- **Trainer** - CLT implementation with adaptive pacing, feedback, and scoring
-- **Tests** - Comprehensive validation including CLT principle adherence
+- **Storage** - File-based session persistence with JSON serialization
+- **Trainer** - CLT implementation with adaptive pacing, feedback, scoring, and session management
+- **Tests** - Comprehensive validation including CLT principle adherence and session operations

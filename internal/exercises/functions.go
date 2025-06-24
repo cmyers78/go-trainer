@@ -2,7 +2,7 @@ package exercises
 
 import (
 	"strings"
-	"github.com/cmyers78/go-trainer/internal/models"
+	"github.com/cmyers78/claude/internal/models"
 )
 
 // GetFunctionsExercise creates a comprehensive functions learning module

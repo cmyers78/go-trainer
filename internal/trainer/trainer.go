@@ -7,7 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cmyers78/go-trainer/internal/models"
+	"github.com/cmyers78/claude/internal/models"
+	"github.com/cmyers78/claude/internal/storage"
 )
 
 // CLTTrainer implements Cognitive Load Theory principles
@@ -17,16 +18,35 @@ type CLTTrainer struct {
 	progress   []models.LearningProgress
 	current    int
 	startTime  time.Time
+	sessionID  string
+	userID     string
+	storage    storage.SessionStorage
 }
 
 // NewCLTTrainer creates a new trainer with CLT principles
-func NewCLTTrainer(exercises []models.Exercise, config models.TrainerConfig) *CLTTrainer {
+func NewCLTTrainer(exercises []models.Exercise, config models.TrainerConfig, userID string, sessionStorage storage.SessionStorage) *CLTTrainer {
 	return &CLTTrainer{
 		config:    config,
 		exercises: exercises,
 		progress:  make([]models.LearningProgress, len(exercises)),
 		current:   0,
 		startTime: time.Now(),
+		userID:    userID,
+		storage:   sessionStorage,
+	}
+}
+
+// NewCLTTrainerFromSession creates a trainer from a saved session
+func NewCLTTrainerFromSession(session *models.TrainingSession, exercises []models.Exercise, sessionStorage storage.SessionStorage) *CLTTrainer {
+	return &CLTTrainer{
+		config:    session.Config,
+		exercises: exercises,
+		progress:  session.Progress,
+		current:   session.CurrentIndex,
+		startTime: session.StartTime,
+		sessionID: session.SessionID,
+		userID:    session.UserID,
+		storage:   sessionStorage,
 	}
 }
 
@@ -75,7 +95,7 @@ func (t *CLTTrainer) showWelcome() {
 	fmt.Println("• Multiple practice opportunities")
 	fmt.Println("• Adaptive pacing based on your progress")
 	fmt.Println()
-	fmt.Println("Commands: 'hint', 'skip', 'quit', 'help'")
+	fmt.Println("Commands: 'hint', 'skip', 'pause', 'quit', 'help'")
 	fmt.Println()
 }
 
@@ -159,6 +179,13 @@ func (t *CLTTrainer) runSingleChallenge(challenge models.Challenge, challengeNum
 		
 		switch strings.ToLower(input) {
 		case "quit":
+			return false, attempts, hintsUsed
+		case "pause":
+			if err := t.pauseSession(); err != nil {
+				fmt.Printf("❌ Error saving session: %v\n", err)
+			} else {
+				fmt.Println("💾 Session saved! Use 'claude trainer resume' to continue later.")
+			}
 			return false, attempts, hintsUsed
 		case "help":
 			t.showHelp()
@@ -288,7 +315,8 @@ func (t *CLTTrainer) showHelp() {
 	fmt.Println("\n📚 Available Commands:")
 	fmt.Println("  hint  - Get a helpful hint for the current challenge")
 	fmt.Println("  skip  - Skip the current challenge and see the solution")
-	fmt.Println("  quit  - Exit the trainer")
+	fmt.Println("  pause - Save your progress and exit (resume later)")
+	fmt.Println("  quit  - Exit the trainer without saving")
 	fmt.Println("  help  - Show this help message")
 	fmt.Println()
 }
@@ -371,4 +399,73 @@ func (t *CLTTrainer) FormatCodeBlock(code string) string {
 	formatted.WriteString("└" + strings.Repeat("─", 60) + "┘")
 	
 	return formatted.String()
+}
+
+// pauseSession saves the current training state
+func (t *CLTTrainer) pauseSession() error {
+	if t.storage == nil {
+		return fmt.Errorf("no storage configured")
+	}
+
+	now := time.Now()
+	session := &models.TrainingSession{
+		UserID:       t.userID,
+		SessionID:    t.getOrCreateSessionID(),
+		Config:       t.config,
+		Progress:     t.progress,
+		CurrentIndex: t.current,
+		StartTime:    t.startTime,
+		LastActivity: now,
+		PausedAt:     &now,
+		Status:       models.SessionPaused,
+	}
+
+	return t.storage.SaveSession(session)
+}
+
+// getOrCreateSessionID returns existing session ID or creates a new one
+func (t *CLTTrainer) getOrCreateSessionID() string {
+	if t.sessionID == "" {
+		t.sessionID = fmt.Sprintf("%s_%d", t.userID, time.Now().Unix())
+	}
+	return t.sessionID
+}
+
+// ResumeSession loads and continues a paused training session
+func ResumeSession(sessionID string, exercises []models.Exercise, sessionStorage storage.SessionStorage) (*CLTTrainer, error) {
+	session, err := sessionStorage.LoadSession(sessionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load session: %w", err)
+	}
+
+	if session.Status != models.SessionPaused {
+		return nil, fmt.Errorf("session is not paused (status: %s)", session.Status)
+	}
+
+	// Store pause time before clearing it
+	pausedAt := session.PausedAt
+
+	// Update session status to active
+	session.Status = models.SessionActive
+	session.PausedAt = nil
+
+	if err := sessionStorage.SaveSession(session); err != nil {
+		return nil, fmt.Errorf("failed to update session status: %w", err)
+	}
+
+	trainer := NewCLTTrainerFromSession(session, exercises, sessionStorage)
+	
+	if pausedAt != nil {
+		fmt.Printf("🔄 Resuming session from %s\n", pausedAt.Format("2006-01-02 15:04:05"))
+	}
+	fmt.Printf("📍 Current position: Exercise %d/%d (%s)\n", 
+		session.CurrentIndex+1, len(exercises), exercises[session.CurrentIndex].Title)
+	fmt.Println()
+
+	return trainer, nil
+}
+
+// ListUserSessions returns all training sessions for a user
+func ListUserSessions(userID string, sessionStorage storage.SessionStorage) ([]*models.TrainingSession, error) {
+	return sessionStorage.ListSessions(userID)
 }
