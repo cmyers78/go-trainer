@@ -442,6 +442,9 @@ func ResumeSession(sessionID string, exercises []models.Exercise, sessionStorage
 		return nil, fmt.Errorf("session is not paused (status: %s)", session.Status)
 	}
 
+	// Store pause time before clearing it
+	pausedAt := session.PausedAt
+
 	// Update session status to active
 	session.Status = models.SessionActive
 	session.PausedAt = nil
@@ -452,7 +455,9 @@ func ResumeSession(sessionID string, exercises []models.Exercise, sessionStorage
 
 	trainer := NewCLTTrainerFromSession(session, exercises, sessionStorage)
 	
-	fmt.Printf("🔄 Resuming session from %s\n", session.PausedAt.Format("2006-01-02 15:04:05"))
+	if pausedAt != nil {
+		fmt.Printf("🔄 Resuming session from %s\n", pausedAt.Format("2006-01-02 15:04:05"))
+	}
 	fmt.Printf("📍 Current position: Exercise %d/%d (%s)\n", 
 		session.CurrentIndex+1, len(exercises), exercises[session.CurrentIndex].Title)
 	fmt.Println()

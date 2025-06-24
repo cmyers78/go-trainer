@@ -1,6 +1,6 @@
 package exercises
 
-import "github.com/cmyers78/go-trainer/internal/models"
+import "github.com/cmyers78/claude/internal/models"
 
 // Registry holds all available exercises
 type Registry struct {

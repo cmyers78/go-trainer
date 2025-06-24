@@ -3,8 +3,8 @@ package unit
 import (
 	"testing"
 
-	"github.com/cmyers78/go-trainer/internal/exercises"
-	"github.com/cmyers78/go-trainer/internal/models"
+	"github.com/cmyers78/claude/internal/exercises"
+	"github.com/cmyers78/claude/internal/models"
 )
 
 func TestExerciseRegistry(t *testing.T) {
