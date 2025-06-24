@@ -1,6 +1,7 @@
 package benchmark
 
 import (
+	"strconv"
 	"testing"
 	"time"
 
@@ -110,7 +111,7 @@ func BenchmarkSessionSave(b *testing.B) {
 	b.ResetTimer()
 	
 	for i := 0; i < b.N; i++ {
-		session.SessionID = "bench-session-" + string(rune(i)) // Make unique
+		session.SessionID = "bench-session-" + strconv.Itoa(i) // Make unique
 		sessionStorage.SaveSession(session)
 	}
 }
@@ -161,7 +162,7 @@ func BenchmarkListSessions(b *testing.B) {
 	for i := 0; i < 10; i++ {
 		session := &models.TrainingSession{
 			UserID:    "bench-user",
-			SessionID: "session-" + string(rune('0'+i)),
+			SessionID: "session-" + strconv.Itoa(i),
 			Status:    models.SessionPaused,
 			StartTime: time.Now(),
 		}
