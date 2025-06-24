@@ -5,11 +5,24 @@
 - Use descriptive branch names: `feature/description`, `fix/issue-name`, `refactor/component`
 - Branch naming format: `feature/pause-resume-training`, `fix/session-storage-bug`
 
+## Documentation Requirements for ALL PRs
+**MANDATORY**: Before pushing any feature branch or creating a PR, ALWAYS update:
+
+1. **README.md** - Add new features, usage examples, commands, and architecture changes
+2. **CHANGELOG.md** - Document all changes in the [Unreleased] section following Keep a Changelog format
+3. **Code Documentation** - Update inline comments and function documentation as needed
+
+**No PR should be created without proper documentation updates.** This ensures:
+- Users understand new functionality
+- Changes are properly tracked and versioned
+- Future contributors can understand the evolution of the codebase
+
 ## Development Standards
 - Follow existing code patterns and conventions
 - Run tests before committing (when available)
 - Use meaningful commit messages
 - Always add proper error handling
+- Write comprehensive tests for all new functionality
 
 ## Project Structure
 - `cmd/trainer/` - CLI entry points

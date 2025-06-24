@@ -8,6 +8,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Session Management System** - Complete pause/resume functionality for training sessions
+  - Pause training at any point with `pause` command during challenges
+  - Resume sessions exactly where you left off with `trainer resume` command
+  - List all training sessions with `trainer list` command
+  - Delete old sessions with `trainer delete` command
+  - Persistent session storage in `~/.claude-trainer/sessions/` directory
+  - JSON serialization of complete training state (progress, scores, timing, configuration)
+  - Support for multiple concurrent sessions with user selection
+  - Session status tracking (active, paused, completed, abandoned)
+
+- **Enhanced CLI Interface**
+  - New command-line arguments for session management operations
+  - Interactive session selection when multiple paused sessions exist
+  - Confirmation prompts for destructive operations (session deletion)
+  - Improved error handling and user feedback messages
+
+- **Comprehensive Testing Suite for Session Management**
+  - Unit tests for session storage operations (save/load/list/delete)
+  - Unit tests for trainer pause/resume functionality  
+  - Benchmark tests for session performance optimization
+  - Edge case testing (non-existent sessions, wrong status, etc.)
+  - JSON serialization/deserialization validation
+
 - **Enhanced Learning Curriculum** - Comprehensive lesson plan with proper learning progression
   - Basic Data Types exercise covering numeric types, strings, and constants  
   - Composite Types exercise covering arrays, slices, and maps
@@ -16,8 +39,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Improved GitHub Actions** - Fixed nightly tests workflow for empty integration directory
 
 ### Changed
+- **Module Structure** - Updated module name from `go-trainer` to `claude` with proper import path fixes
+- **Trainer Architecture** - Enhanced CLTTrainer to support session persistence and restoration
 - **Exercise Ordering** - Reordered functions to come after composite types in curriculum for better learning flow
 - **Prerequisites** - Updated function exercise prerequisites to include basic and composite types
+
+### Fixed
+- **Session Resume Bug** - Fixed null pointer exception when accessing cleared PausedAt field during session resumption
+- **Import Path Issues** - Updated all internal package imports to use correct module name
 
 ## [2.0.0] - 2025-01-XX
 
