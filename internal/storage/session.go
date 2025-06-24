@@ -3,6 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -91,7 +92,9 @@ func (fs *FileSessionStorage) ListSessions(userID string) ([]*models.TrainingSes
 			sessionID := file.Name()[:len(file.Name())-5] // Remove .json extension
 			session, err := fs.LoadSession(sessionID)
 			if err != nil {
-				continue // Skip corrupted session files
+				// Log corrupted session files for troubleshooting
+				log.Printf("Warning: Skipping corrupted session file %s: %v", file.Name(), err)
+				continue
 			}
 			if session.UserID == userID {
 				sessions = append(sessions, session)
